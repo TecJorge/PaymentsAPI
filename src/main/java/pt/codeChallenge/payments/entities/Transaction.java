@@ -1,4 +1,4 @@
-package pt.codeChallenge.payments.clients;
+package pt.codeChallenge.payments.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "transaction", schema = "dbo")
+@Table(name = "payments_transaction", schema = "dbo")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,6 +25,8 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "transactionId", nullable = false)
     private Long transactionId;
+    @Column(name = "userId",nullable = false)
+    private Long userId;
     @Column(name = "amount", precision = 19, scale = 2, nullable = false)
     private BigDecimal amount;
     @Column(name = "scheduledDate", nullable = false)
@@ -33,4 +35,6 @@ public class Transaction {
     private BigDecimal fee;
     @Column(name = "totalAmount", precision = 19, scale = 2, nullable = false)
     private BigDecimal totalAmount;
+    @Column(name = "isComplete")
+    private Boolean isComplete = false;
 }

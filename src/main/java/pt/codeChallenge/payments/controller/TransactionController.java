@@ -34,7 +34,7 @@ public class TransactionController {
     public ResponseEntity<CreateTransactionResponse> createTransaction(
             @Valid @RequestBody CreateTransactionRequest request) {
 
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<>(transactionService.createTransaction(request),HttpStatus.OK);
     }
 
     @Operation(
