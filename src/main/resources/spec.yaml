@@ -1,0 +1,216 @@
+openapi: 3.0.3
+
+info:
+  title: Bank Transaction Scheduling API
+  version: 1.0.0
+  description: |
+    API developed for a Code Challenge that schedules and manages bank transactions.
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Transactions
+    description: Bank transaction scheduling operations
+
+paths:
+
+  /transaction/create:
+    post:
+      tags:
+        - Transactions
+      operationId: createTransaction
+      summary: Schedule a transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransactionRequest'
+      responses:
+        '200':
+          description: Transaction scheduled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTransactionResponse'
+        '400':
+          description: Invalid transaction
+
+  /transaction/retrieve:
+    get:
+      tags:
+        - Transactions
+      operationId: retrieveTransactions
+      summary: Retrieve scheduled transactions
+      responses:
+        '200':
+          description: Transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveAllTransactionsResponse'
+
+  /transaction/{id}:
+    get:
+      tags:
+        - Transactions
+      operationId: retrieveTransaction
+      summary: Retrieve a transaction by ID
+      parameters:
+        - $ref: '#/components/parameters/TransactionId'
+      responses:
+        '200':
+          description: Transaction found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '404':
+          description: Transaction not found
+
+  /transaction/update:
+    put:
+      tags:
+        - Transactions
+      operationId: updateTransaction
+      summary: Update a scheduled transaction
+      parameters:
+        - $ref: '#/components/parameters/TransactionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTransactionRequest'
+      responses:
+        '200':
+          description: Transaction updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateTransactionResponse'
+        '400':
+          description: Invalid transaction
+        '404':
+          description: Transaction not found
+
+  /transaction/delete:
+    delete:
+      tags:
+        - Transactions
+      operationId: deleteTransaction
+      summary: Delete a scheduled transaction
+      parameters:
+        - $ref: '#/components/parameters/TransactionId'
+      responses:
+        '200':
+          description: Transaction deleted successfully
+        '404':
+          description: Transaction not found
+
+
+components:
+
+  parameters:
+    TransactionId:
+      name: id
+      in: path
+      required: true
+      description: Transaction identifier
+      schema:
+        $ref: '#/components/schemas/TransactionId'
+
+  schemas:
+    CreateTransactionRequest:
+      type: object
+      required:
+        - amount
+        - scheduledDate
+      properties:
+        amount:
+          $ref: '#/components/schemas/Amount'
+        scheduledDate:
+          $ref: '#/components/schemas/ScheduledDate'
+
+    UpdateTransactionRequest:
+      type: object
+      required:
+        - transactionId
+        - amount
+        - scheduledDate
+      properties:
+        transactionId:
+          $ref: '#/components/schemas/TransactionId'
+        amount:
+          $ref: '#/components/schemas/Amount'
+        scheduledDate:
+          $ref: '#/components/schemas/ScheduledDate'
+
+    Transaction:
+      type: object
+      required:
+        - transactionId
+        - amount
+        - scheduledDate
+        - fee
+        - totalAmount
+      properties:
+        transactionId:
+          $ref: '#/components/schemas/TransactionId'
+        amount:
+          $ref: '#/components/schemas/Amount'
+        scheduledDate:
+          $ref: '#/components/schemas/ScheduledDate'
+        fee:
+          $ref: '#/components/schemas/Fee'
+        totalAmount:
+          $ref: '#/components/schemas/TotalAmount'
+
+    UpdateTransactionResponse:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Transaction"
+
+    CreateTransactionResponse:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Transaction"
+
+    RetrieveAllTransactionsResponse:
+      type: object
+      properties:
+        transactionList:
+          $ref: '#/components/schemas/TransactionsList'
+
+    TransactionsList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Transaction'
+
+    TransactionId:
+      type: integer
+      format: int64
+      example: 1
+
+    Amount:
+      type: number
+      format: decimal
+      minimum: 0.01
+      example: 1100
+
+    TotalAmount:
+      type: number
+      format: decimal
+      example: 1635.00
+
+    Fee:
+      type: number
+      format: decimal
+      minimum: 0.01
+      example: 1100
+
+    ScheduledDate:
+      type: string
+      format: date
+      example: 2026-09-15
