@@ -75,8 +75,6 @@ paths:
         - Transactions
       operationId: updateTransaction
       summary: Update a scheduled transaction
-      parameters:
-        - $ref: '#/components/parameters/TransactionId'
       requestBody:
         required: true
         content:
