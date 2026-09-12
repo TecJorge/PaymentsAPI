@@ -8,6 +8,8 @@ import pt.codeChallenge.api.ErrorResponse;
 
 import java.time.OffsetDateTime;
 
+import static pt.codeChallenge.payments.constants.Constants.DEFAULT_ERROR_MESSAGE;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -19,6 +21,21 @@ public class GlobalExceptionHandler {
                 OffsetDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 exception.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(
+            Exception exception) {
+
+        ErrorResponse error = new ErrorResponse(
+                OffsetDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                DEFAULT_ERROR_MESSAGE.concat(":"+exception.getMessage())
         );
 
         return ResponseEntity
