@@ -4,9 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import pt.codeChallenge.api.CreateTransactionRequest;
-import pt.codeChallenge.api.CreateTransactionResponse;
-import pt.codeChallenge.api.RetrieveAllTransactionsResponse;
+import pt.codeChallenge.api.*;
 import pt.codeChallenge.payments.entities.Transaction;
 import pt.codeChallenge.payments.enums.TransactionFees;
 import pt.codeChallenge.payments.mappers.TransactionMapper;
@@ -32,7 +30,7 @@ public class TransactionService {
 
     @Transactional
     public CreateTransactionResponse createTransaction(CreateTransactionRequest request) {
-        validateDates(request);
+        validateDates(request.getScheduledDate());
         TransactionFees fees = feeSupplier.calculateFee(request.getScheduledDate(), request.getAmount());
         Transaction transaction = transactionMapper.toTransaction(request, fees);
         return transactionMapper.toCreateTransactionResponse(paymentsTransactionRepository.save(transaction));
@@ -52,9 +50,27 @@ public class TransactionService {
         return transactionMapper.toTransactionDTO(transaction);
     }
 
-    void validateDates(CreateTransactionRequest request) {
+    @Transactional
+    public UpdateTransactionResponse updateTransactionResponse(UpdateTransactionRequest request){
+        validateDates(request.getScheduledDate());
+        Transaction transaction = paymentsTransactionRepository
+                .findByUserIdAndTransactionId(request.getUserId(), request.getTransactionId())
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+        if (transaction.getIsComplete()) {
+            throw new IllegalArgumentException(
+                    "Completed transactions cannot be updated"
+            );
+        }
+
+        TransactionFees fees = feeSupplier.calculateFee(request.getScheduledDate(), request.getAmount());
+        Transaction updatedTransaction = transactionMapper.updateTransaction(transaction,request,fees);
+        return transactionMapper.toUpdateTransactionResponse(updatedTransaction);
+    }
+
+    void validateDates(LocalDate scheduledDate) {
         LocalDate today = LocalDate.now();
-        if (request.getScheduledDate().isBefore(today)) {
+        if (scheduledDate.isBefore(today)) {
             throw new IllegalArgumentException("Provided scheduledDate must be a present day");
         }
     }

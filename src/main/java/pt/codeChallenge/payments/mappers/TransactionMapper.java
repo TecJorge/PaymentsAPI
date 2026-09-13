@@ -2,8 +2,11 @@ package pt.codeChallenge.payments.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import pt.codeChallenge.api.CreateTransactionRequest;
 import pt.codeChallenge.api.CreateTransactionResponse;
+import pt.codeChallenge.api.UpdateTransactionRequest;
+import pt.codeChallenge.api.UpdateTransactionResponse;
 import pt.codeChallenge.payments.entities.Transaction;
 import pt.codeChallenge.payments.enums.TransactionFees;
 
@@ -27,6 +30,13 @@ public interface TransactionMapper {
 
     pt.codeChallenge.api.Transaction toTransactionDTO(Transaction transaction);
 
+    @Mapping(target = ".", source = "request")
+    @Mapping(target = "fee", expression = "java(calculateFees(request,fees))")
+    @Mapping(target = "totalAmount", expression = "java(calculateTotalAmount(request,calculateFees(request,fees)))")
+    Transaction updateTransaction(@MappingTarget Transaction transaction,UpdateTransactionRequest request, TransactionFees fees);
+
+    UpdateTransactionResponse toUpdateTransactionResponse(Transaction transaction);
+
     default BigDecimal calculateFees(CreateTransactionRequest request, TransactionFees fees) {
         BigDecimal value = request.getAmount().multiply(fees.getPercentage());
         return TransactionFees.FEE_A.equals(fees) ? value.add(FEE_A_FIXED_VALUE) : value;
@@ -36,4 +46,12 @@ public interface TransactionMapper {
         return request.getAmount().add(fees);
     }
 
+    default BigDecimal calculateFees(UpdateTransactionRequest request, TransactionFees fees) {
+        BigDecimal value = request.getAmount().multiply(fees.getPercentage());
+        return TransactionFees.FEE_A.equals(fees) ? value.add(FEE_A_FIXED_VALUE) : value;
+    }
+
+    default BigDecimal calculateTotalAmount(UpdateTransactionRequest request, BigDecimal fees) {
+        return request.getAmount().add(fees);
+    }
 }

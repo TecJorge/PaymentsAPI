@@ -81,7 +81,7 @@ public class TransactionController {
     @PutMapping("/update")
     public ResponseEntity<UpdateTransactionResponse> updateTransaction(
             @Valid @RequestBody UpdateTransactionRequest request) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<>(transactionService.updateTransactionResponse(request),HttpStatus.OK);
     }
 
     @Operation(
