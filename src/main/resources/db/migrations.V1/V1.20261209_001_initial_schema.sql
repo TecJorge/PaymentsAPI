@@ -10,10 +10,16 @@ BEGIN
 CREATE TABLE dbo.payments_transaction
 (
     transactionId BIGINT IDENTITY(1,1) NOT NULL,
+    userId        BIGINT NOT NULL,
+
     amount        DECIMAL(19, 2) NOT NULL,
     scheduledDate DATE           NOT NULL,
     fee           DECIMAL(19, 2) NOT NULL,
     totalAmount   DECIMAL(19, 2) NOT NULL,
+
+    isComplete    BIT NOT NULL
+        CONSTRAINT DF_payments_transaction_isComplete
+        DEFAULT 0,
 
     createdAt     DATETIME2(7) NOT NULL
             CONSTRAINT DF_payments_transaction_createdAt
@@ -34,6 +40,40 @@ CREATE TABLE dbo.payments_transaction
 );
 END
 GO
+
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.tables t
+    INNER JOIN sys.schemas s
+        ON s.schema_id = t.schema_id
+    WHERE s.name = 'dbo'
+      AND t.name = 'payments_transaction_deleted'
+)
+
+BEGIN
+CREATE TABLE dbo.payments_transaction_deleted
+(
+    transactionId BIGINT NOT NULL,
+    userId        BIGINT NOT NULL,
+
+    amount        DECIMAL(19, 2) NOT NULL,
+    scheduledDate DATE           NOT NULL,
+    fee           DECIMAL(19, 2) NOT NULL,
+    totalAmount   DECIMAL(19, 2) NOT NULL,
+
+    isComplete    BIT NOT NULL,
+
+    deletedAt     DATETIME2(7) NOT NULL
+            CONSTRAINT DF_payments_transaction_deleted_deletedAt
+            DEFAULT SYSUTCDATETIME(),
+
+    CONSTRAINT PK_payments_transaction_deleted
+        PRIMARY KEY (transactionId)
+);
+END
+GO
+
 
 CREATE OR ALTER TRIGGER dbo.TR_payments_transaction_updatedAt
 ON dbo.payments_transaction

@@ -5,9 +5,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import pt.codeChallenge.api.*;
+import pt.codeChallenge.payments.entities.DeletedTransaction;
 import pt.codeChallenge.payments.entities.Transaction;
 import pt.codeChallenge.payments.enums.TransactionFees;
 import pt.codeChallenge.payments.mappers.TransactionMapper;
+import pt.codeChallenge.payments.repositories.PaymentsTransactionDeletedRepository;
 import pt.codeChallenge.payments.repositories.PaymentsTransactionRepository;
 import pt.codeChallenge.payments.suppliers.FeeSupplier;
 
@@ -20,6 +22,7 @@ public class TransactionService {
 
     private FeeSupplier feeSupplier;
     private final PaymentsTransactionRepository paymentsTransactionRepository;
+    private final PaymentsTransactionDeletedRepository paymentsTransactionDeletedRepository;
     private final TransactionMapper transactionMapper;
 
 
@@ -37,13 +40,13 @@ public class TransactionService {
 
     }
 
-    public RetrieveAllTransactionsResponse retrieveAllTransactions(Long userId){
+    public RetrieveAllTransactionsResponse retrieveAllTransactions(Long userId) {
         List<Transaction> transactionList = paymentsTransactionRepository.findAllByUserId(userId);
         List<pt.codeChallenge.api.Transaction> transactions = transactionMapper.toTransactionList(transactionList);
         return new RetrieveAllTransactionsResponse().transactionList(transactions);
     }
 
-    public pt.codeChallenge.api.Transaction retrieveTransaction(Long userId, Long transactionId){
+    public pt.codeChallenge.api.Transaction retrieveTransaction(Long userId, Long transactionId) {
         Transaction transaction = paymentsTransactionRepository
                 .findByUserIdAndTransactionId(userId, transactionId)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
@@ -51,7 +54,7 @@ public class TransactionService {
     }
 
     @Transactional
-    public UpdateTransactionResponse updateTransactionResponse(UpdateTransactionRequest request){
+    public UpdateTransactionResponse updateTransactionResponse(UpdateTransactionRequest request) {
         validateDates(request.getScheduledDate());
         Transaction transaction = paymentsTransactionRepository
                 .findByUserIdAndTransactionId(request.getUserId(), request.getTransactionId())
@@ -64,8 +67,18 @@ public class TransactionService {
         }
 
         TransactionFees fees = feeSupplier.calculateFee(request.getScheduledDate(), request.getAmount());
-        Transaction updatedTransaction = transactionMapper.updateTransaction(transaction,request,fees);
+        Transaction updatedTransaction = transactionMapper.updateTransaction(transaction, request, fees);
         return transactionMapper.toUpdateTransactionResponse(updatedTransaction);
+    }
+
+    @Transactional
+    public void deleteTransaction(Long transactionId, Long userId) {
+        Transaction transaction = paymentsTransactionRepository
+                .findByUserIdAndTransactionId(userId, transactionId)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+        DeletedTransaction deletedTransaction = transactionMapper.toDeletedTransaction(transaction);
+        paymentsTransactionDeletedRepository.save(deletedTransaction);
+        paymentsTransactionRepository.delete(transaction);
     }
 
     void validateDates(LocalDate scheduledDate) {

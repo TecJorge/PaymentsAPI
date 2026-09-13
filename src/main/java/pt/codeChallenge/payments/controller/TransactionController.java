@@ -25,75 +25,75 @@ public class TransactionController {
 
     @Operation(
             operationId = "createTransaction",
-            summary ="Schedule a transaction",
+            summary = "Schedule a transaction",
             responses = {
-               @ApiResponse(responseCode = "200",description = "Success",content = {
-                       @Content(mediaType = "application/json",schema = @Schema(implementation = CreateTransactionResponse.class))
-               })
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = CreateTransactionResponse.class))
+                    })
             }
     )
     @PostMapping("/create")
     public ResponseEntity<CreateTransactionResponse> createTransaction(
             @Valid @RequestBody CreateTransactionRequest request) {
 
-        return new ResponseEntity<>(transactionService.createTransaction(request),HttpStatus.OK);
+        return new ResponseEntity<>(transactionService.createTransaction(request), HttpStatus.OK);
     }
 
     @Operation(
             operationId = "retrieveTransactions",
-            summary ="Retrieve scheduled transactions",
+            summary = "Retrieve scheduled transactions",
             responses = {
-                    @ApiResponse(responseCode = "200",description = "Success",content = {
-                            @Content(mediaType = "application/json",schema = @Schema(implementation = RetrieveAllTransactionsResponse.class))
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = RetrieveAllTransactionsResponse.class))
                     })
             }
     )
     @GetMapping("/retrieve")
     public ResponseEntity<RetrieveAllTransactionsResponse> retrieveTransactions(@Parameter @NotNull Long userId) {
-        return new ResponseEntity<>(transactionService.retrieveAllTransactions(userId),HttpStatus.OK);
+        return new ResponseEntity<>(transactionService.retrieveAllTransactions(userId), HttpStatus.OK);
     }
 
     @Operation(
             operationId = "retrieveTransaction",
             summary = "Retrieve a transaction by ID",
             responses = {
-                    @ApiResponse(responseCode = "200",description = "Success",content = {
-                            @Content(mediaType = "application/json",schema = @Schema(implementation = Transaction.class))
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = Transaction.class))
                     })
             }
     )
     @GetMapping()
-    public ResponseEntity<Transaction> retrieveTransaction(@Parameter Long userId,
-            @Parameter Long transactionId) {
+    public ResponseEntity<Transaction> retrieveTransaction(@Parameter @NotNull Long userId, @Parameter @NotNull Long transactionId) {
 
-        return new ResponseEntity<>(transactionService.retrieveTransaction(userId,transactionId),HttpStatus.OK);
+        return new ResponseEntity<>(transactionService.retrieveTransaction(userId, transactionId), HttpStatus.OK);
     }
 
     @Operation(
             operationId = "updateTransaction",
             summary = "Update a scheduled transaction",
             responses = {
-                    @ApiResponse(responseCode = "200",description = "Success",content = {
-                            @Content(mediaType = "application/json",schema = @Schema(implementation = UpdateTransactionResponse.class))
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = UpdateTransactionResponse.class))
                     })
             }
     )
     @PutMapping("/update")
     public ResponseEntity<UpdateTransactionResponse> updateTransaction(
             @Valid @RequestBody UpdateTransactionRequest request) {
-        return new ResponseEntity<>(transactionService.updateTransactionResponse(request),HttpStatus.OK);
+        return new ResponseEntity<>(transactionService.updateTransactionResponse(request), HttpStatus.OK);
     }
 
     @Operation(
             operationId = "deleteTransaction",
             summary = "Delete a scheduled transaction",
             responses = {
-                    @ApiResponse(responseCode = "200",description = "Transaction deleted successfully")
-                    }
+                    @ApiResponse(responseCode = "200", description = "Transaction deleted successfully")
+            }
     )
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteTransaction(
-            @RequestParam Long transactionId) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+            @Parameter @NotNull Long transactionId, @Parameter @NotNull Long userId) {
+        transactionService.deleteTransaction(transactionId, userId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
