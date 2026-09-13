@@ -1,3 +1,0 @@
-databaseChangeLog:
-  - include:
-      file: db/migrations/V1/V1.20261209_001_initial_schema.sql
