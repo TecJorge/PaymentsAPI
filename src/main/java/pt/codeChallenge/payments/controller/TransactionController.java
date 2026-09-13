@@ -1,11 +1,13 @@
 package pt.codeChallenge.payments.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -47,9 +49,8 @@ public class TransactionController {
             }
     )
     @GetMapping("/retrieve")
-    public ResponseEntity<RetrieveAllTransactionsResponse> retrieveTransactions() {
-
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<RetrieveAllTransactionsResponse> retrieveTransactions(@Parameter @NotNull Long userId) {
+        return new ResponseEntity<>(transactionService.retrieveAllTransactions(userId),HttpStatus.OK);
     }
 
     @Operation(
@@ -61,11 +62,11 @@ public class TransactionController {
                     })
             }
     )
-    @GetMapping("/{transactionId}")
-    public ResponseEntity<Transaction> retrieveTransaction(
-            @PathVariable Long transactionId) {
+    @GetMapping()
+    public ResponseEntity<Transaction> retrieveTransaction(@Parameter Long userId,
+            @Parameter Long transactionId) {
 
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<>(transactionService.retrieveTransaction(userId,transactionId),HttpStatus.OK);
     }
 
     @Operation(

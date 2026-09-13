@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import pt.codeChallenge.payments.entities.Transaction;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PaymentsTransactionRepository extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
@@ -20,4 +22,9 @@ public interface PaymentsTransactionRepository extends JpaRepository<Transaction
                   AND t.scheduledDate <= :today
             """)
     int markCompleted(LocalDate today);
+
+
+    List<Transaction> findAllByUserId(Long userId);
+
+    Optional<Transaction> findByUserIdAndTransactionId(Long userId, Long transactionId);
 }
