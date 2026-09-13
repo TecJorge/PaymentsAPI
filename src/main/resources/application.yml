@@ -22,6 +22,3 @@ spring:
         physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
         default_schema: dbo
         generate_statistics: false
-
-  liquibase:
-    enabled: false
