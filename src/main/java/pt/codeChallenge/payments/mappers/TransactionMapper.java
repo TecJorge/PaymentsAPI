@@ -7,6 +7,7 @@ import pt.codeChallenge.api.CreateTransactionRequest;
 import pt.codeChallenge.api.CreateTransactionResponse;
 import pt.codeChallenge.api.UpdateTransactionRequest;
 import pt.codeChallenge.api.UpdateTransactionResponse;
+import pt.codeChallenge.payments.entities.DeletedTransaction;
 import pt.codeChallenge.payments.entities.Transaction;
 import pt.codeChallenge.payments.enums.TransactionFees;
 
@@ -33,9 +34,11 @@ public interface TransactionMapper {
     @Mapping(target = ".", source = "request")
     @Mapping(target = "fee", expression = "java(calculateFees(request,fees))")
     @Mapping(target = "totalAmount", expression = "java(calculateTotalAmount(request,calculateFees(request,fees)))")
-    Transaction updateTransaction(@MappingTarget Transaction transaction,UpdateTransactionRequest request, TransactionFees fees);
+    Transaction updateTransaction(@MappingTarget Transaction transaction, UpdateTransactionRequest request, TransactionFees fees);
 
     UpdateTransactionResponse toUpdateTransactionResponse(Transaction transaction);
+
+    DeletedTransaction toDeletedTransaction(Transaction transaction);
 
     default BigDecimal calculateFees(CreateTransactionRequest request, TransactionFees fees) {
         BigDecimal value = request.getAmount().multiply(fees.getPercentage());
